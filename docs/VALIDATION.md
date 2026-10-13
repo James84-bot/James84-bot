@@ -22,12 +22,35 @@ for, *even though* POS and ERP products already exist.
 |---|---|---|
 | Excel / bin cards / stock book | Everything, manually | No audit trail, errors found only at monthly count |
 | TallyPrime, QuickBooks | Accounting first, inventory second | Branch transfers, PO approval and per-branch stock are weak or need add-ons |
-| Kenyan POS/ERP vendors (Uzapoint, Veira, iOSoft, ArmPOS, Absolute Corporate Solutions) | POS, stock, eTIMS invoicing, some M-Pesa | Mostly retail/POS-shaped; unknown how well they handle approvals, partial receiving and credit ageing |
+| Uzapoint | POS, inventory, accounting, multiple branches/outlets, purchase orders and goods received, free tier | Prices not published. Unknown: PO approval, partial receiving, transfers in transit |
+| Veira | POS, M-Pesa and card, stock by item/branch/value, eTIMS invoice on every sale (claims offline support) | Prices not published. No published evidence of inter-branch transfers or PO approval |
+| Other Kenyan POS/ERP vendors (iOSoft, ArmPOS, Absolute Corporate Solutions) | POS, stock, barcode, some accounting | Mostly retail/POS-shaped; unknown how well they handle approvals, partial receiving and credit ageing |
 | Odoo, ERPNext, Business Central | Full ERP, eTIMS via partners | Cost and complexity of implementation for a 5–20 person business |
 | Zoho Inventory, inFlow | Good inventory | Priced in USD; no eTIMS; not built around Kenyan credit practice |
 
-**Conclusion:** the market is crowded. "Inventory software for Kenyan SMEs" is
-not a differentiator on its own. We need evidence of a specific gap.
+**Adoption is low, and cost is the main barrier.** Small regional studies (no
+national survey was found):
+
+- Kisii and Nyamira counties, 104 SMEs: about 11.5% use accounting software or
+  inventory systems, while about 92% use mobile money.
+- Nairobi urban, 73 SMEs: 72% used no accounting application; 40% named cost
+  as a barrier; 21% used Excel for stock control.
+
+Both samples are small and not specific to distributors, so treat them as
+directional only.
+
+**Conclusions:**
+
+1. The market is crowded with POS-first products. "Inventory software for
+   Kenyan SMEs" is not a differentiator on its own.
+2. The main competitor is Excel and paper, not other software. Most target
+   businesses have not bought any tool yet, and cost puts them off. That makes
+   the price test (A6) and setup effort as important as features.
+3. The possible gap is **back-office control for multi-branch distributors**:
+   PO approval, partial receiving, goods in transit between branches, and an
+   audit trail. Published material from Uzapoint and Veira doesn't show these
+   in depth. This is unconfirmed: vendor pages are incomplete. See the
+   competitor demo checklist in [validation/COMPETITOR_CHECK.md](validation/COMPETITOR_CHECK.md).
 
 ## 3. Findings that change the plan
 
@@ -41,8 +64,20 @@ Consequence: **an invoicing module that does not transmit to eTIMS forces
 double entry** (once in JMH Ops, once in eTIMS). A business owner would
 reasonably refuse that. Options:
 
-- **A. Integrate with eTIMS (OSCU/VSCU).** Correct long-term answer. Needs KRA
-  onboarding, test credentials and certification; real effort and lead time.
+- **A. Integrate with eTIMS directly (OSCU/VSCU).** KRA's published process:
+  read the OSCU/VSCU specifications, build and test in the eTIMS sandbox, submit
+  the eTIMS Bio Data Form plus the integration software and documents, pass a
+  technical and administrative review, receive an interim approval
+  certificate. OSCU (hosted at KRA) suits always-online invoicing; VSCU (hosted
+  on our side) suits bulk or sometimes-offline invoicing. Passing the sandbox
+  does not mean production approval. Realistic lead time: months, not weeks.
+  KRA's step guide we found is version 1.1 from 2023, so confirm current specs
+  with KRA before starting.
+- **A2. Integrate through a KRA-verified third-party integrator.** KRA allows
+  taxpayers to use verified integrators instead of self-integrating. JMH Ops
+  would call the integrator's API; the integrator holds the certification.
+  Faster, adds a per-invoice or monthly cost and a supplier dependency. Needs
+  one call to two integrators to get prices and API terms.
 - **B. Do not issue tax invoices.** JMH Ops records *sales orders / delivery
   notes* and customer balances, and the business keeps invoicing in its
   existing eTIMS-capable system. Only works if balances can be imported or
@@ -51,7 +86,8 @@ reasonably refuse that. Options:
   which eTIMS does not touch.
 
 The Phase 3 sales module is **on hold** until interviews tell us which of
-these customers will accept. Option C is the lowest-risk first release.
+these customers will accept. Option C is the lowest-risk first release; A2 is
+the fastest route if interviews show sales must be in the same system.
 
 ### 3.2 M-Pesa
 
@@ -99,7 +135,7 @@ Talk to the owner and, separately, the person who records stock.
 9. Which of these problems costs you the most money? Roughly how much a month?
 10. *(Only now)* Show the mock. "If this existed tomorrow, what would you stop doing?" "What would stop you using it?"
 
-Record answers in `docs/interviews/` using the template, one file per business.
+Record answers in `docs/validation/interviews/` using the template, one file per business. How to recruit, the opening script and the tracker are in [validation/OUTREACH.md](validation/OUTREACH.md); scoring rules are in [validation/SCORING.md](validation/SCORING.md).
 
 ### Prototype for testing
 
@@ -135,7 +171,15 @@ append-only triggers) is in `backend/`. It is parked rather than extended becaus
 
 ## 7. Results
 
-_Not started._
+| Step | Status |
+|---|---|
+| Desk research: competitors, adoption, eTIMS | Done, 13 Oct 2026 (§2, §3) |
+| Outreach kit, interview template, tracker, scoring | Done (`validation/`) |
+| Interviews 1–5 | Not started |
+| Clickable mock (3 screens) | After interview 5 |
+| Interviews 6–10 | Not started |
+| Competitor demos and integrator calls | Not started |
+| Decision | Pending |
 
 ## Sources (desk research, checked 13 October 2026)
 
@@ -150,3 +194,10 @@ Vendor and media sources; KRA's own notices on itax.kra.go.ke take precedence.
 - BetaSuite, eTIMS compliance guide — https://betasuiteerp.com/blog/kra-etims-compliance-guide-kenya
 - People Daily, eTIMS and government procurement — https://peopledaily.digital/business/businesses-face-tighter-payment-checks-as-kra-links-etims-to-govt-procurement
 - Odoo M-Pesa STK module (manual code fallback) — https://apps.odoo.com/apps/modules/17.0/pos_mpesa_stk
+- KRA, eTIMS system-to-system integration — https://www.kra.go.ke/business/etims-electronic-tax-invoice-management-system/learn-about-etims/etims-system-to-system-integration
+- KRA eTIMS portal, certification overview — https://etims.kra.go.ke/main/signup/indexLearnMore
+- KRA OSCU/VSCU sign-up guide (v1.1, 2023) — https://www.kra.go.ke/images/publications/OSCU_VSCU_Step-by-Step_Guide-on-how-to-sign-up.pdf
+- Veira vs Tiwi vs Uzapoint (vendor-written comparison) — https://veirahq.com/blog/veira-vs-tiwi-vs-uzapoint-etims/
+- Uzapoint on Google Play — https://play.google.com/store/apps/details?id=com.uzapoint.upduka&hl=en
+- Determinants of accounting software use among SMEs (Kisii/Nyamira) — https://ajernet.net/ojs/index.php/ajernet/article/download/1166/828/3925
+- Awareness of mobile accounting systems, Nairobi SMEs — https://www.academia.edu/65424557/Awareness_of_the_Mobile_Accounting_Systems_for_Kenyan_Small_to_Medium_Enterprises_Smes_Case_of_Nairobi_Urban
